@@ -140,8 +140,8 @@ namespace Movement.WebApp.Models.DataSources
             {
                 var db = _multiplexer.GetDatabase();
                 var key = MakeKey(entity.Id);
-                // Set with no expiry. If you want TTL, adjust here.
-                return await db.StringSetAsync(key, entity.Value).ConfigureAwait(false);
+                // Set with a 5-minute TTL so cached items expire if not refreshed.
+                return await db.StringSetAsync(key, entity.Value, TimeSpan.FromMinutes(5)).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
