@@ -1,0 +1,17 @@
+@{
+    var selected = ViewData["SelectedSource"] as string ?? "redis";
+}
+<div>
+    <form method="get" asp-action="Index">
+        <label for="id">Id</label>
+        <input type="number" id="id" name="id" />
+        <label for="source">Source</label>
+        <select id="source" name="source">
+            <option value="redis" selected='@(selected == "redis" ? "selected" : null)'>Redis</option>
+            <option value="sdcs" selected='@(selected == "sdcs" ? "selected" : null)'>SelfDesignedCache</option>
+            <option value="db" selected='@(selected == "db" ? "selected" : null)'>Database</option>
+            <option value="coordinator" selected='@(selected == "coordinator" ? "selected" : null)'>Coordinator</option>
+        </select>
+        <button type="submit">Query</button>
+    </form>
+</div>

@@ -1,0 +1,16 @@
+@model Movement.WebApp.Models.DataEntity
+@{
+    ViewData["Title"] = "Create Movement";
+}
+
+<h1>Create</h1>
+
+<form asp-action="Create" method="post">
+    <div>
+        <label asp-for="Value"></label>
+        <input asp-for="Value" />
+    </div>
+    <div>
+        <button type="submit">Create</button>
+    </div>
+</form>

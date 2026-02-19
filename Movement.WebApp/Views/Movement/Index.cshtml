@@ -1,0 +1,72 @@
+@model Movement.WebApp.Models.MovementIndexViewModel
+@{
+    ViewData["Title"] = "Movement Index";
+}
+
+<h1>Movement Cache Viewer</h1>
+
+@await Html.PartialAsync("_FilterPartial")
+<br />
+
+<form asp-action="FlushRedis" method="post" onsubmit="return confirm('Flush all Redis data? This cannot be undone.');">
+    <button type="submit" class="btn btn-danger">Flush Redis</button>
+    @Html.AntiForgeryToken()
+</form>
+<br />
+@if (Model.QueryId.HasValue)
+{
+    if (Model.SelectedEntity != null)
+    {
+        <h2>Result</h2>
+        <dl>
+            <dt>Id</dt>
+            <dd>@Model.SelectedEntity.Id</dd>
+            <dt>Guid</dt>
+            <dd>@Model.SelectedEntity.GuidId</dd>
+            <dt>Value</dt>
+            <dd><pre>@Model.SelectedEntity.Value</pre></dd>
+            <dt>IsDeleted</dt>
+            <dd>@Model.SelectedEntity.IsDeleted</dd>
+        </dl>
+    }
+    else
+    {
+        <p>No entity found for id @Model.QueryId</p>
+    }
+}
+else
+{
+    <h2>@Model.SelectedSource Cache Snapshot</h2>
+
+    <a asp-action="Create">Create New</a>
+
+    @if (Model.RedisEntries != null && Model.RedisEntries.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr><th>Id</th><th>Guid Id</th><th>Value</th><th>IsDeleted</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (var e in Model.RedisEntries)
+            {
+                    <tr>
+                        <td>@e.Id</td>
+                        <td>@e.GuidId</td>
+                    <td><pre>@e.Value</pre></td>
+                    <td>@(e.IsDeleted ? "Deleted" : "Not Deleted")</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@e.Id">Edit Details</a>
+                            <a asp-action="Delete" asp-route-id="@e.Id">Delete</a>
+                            <a asp-action="UnDelete" asp-route-id="@e.Id">Un-Delete</a>
+                                
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No items found in Redis.</p>
+    }
+}

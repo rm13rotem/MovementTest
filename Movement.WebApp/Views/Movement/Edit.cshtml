@@ -1,0 +1,17 @@
+@model Movement.WebApp.Models.DataEntity
+@{
+    ViewData["Title"] = "Edit Movement";
+}
+
+<h1>Edit</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div>
+        <label asp-for="Value"></label>
+        <input asp-for="Value" />
+    </div>
+    <div>
+        <button type="submit">Save</button>
+    </div>
+</form>
