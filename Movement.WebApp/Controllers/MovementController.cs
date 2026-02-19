@@ -6,6 +6,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace Movement.WebApp.Controllers
 {
+    /// <summary>
+    /// MVC controller used by the UI to inspect and manage DataEntity instances across
+    /// the different data sources (Redis, SDCS and DB). It uses injected data source
+    /// implementations to perform reads and writes and exposes UI views for CRUD.
+    /// </summary>
     public class MovementController : Controller
     {
         private readonly IDataSource _coordinator;
@@ -24,7 +29,14 @@ namespace Movement.WebApp.Controllers
             _sdcsSource = sdcsSource;
         }
 
-        // /Movement/FlushRedis
+        /// <summary>
+        /// Deletes cached keys for this application from Redis. This method attempts to
+        /// remove only keys that belong to the configured instance name/prefix so it does
+        /// not issue destructive global FLUSH commands.
+        /// </summary>
+        /// <returns>Redirects back to the Index action.</returns>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> FlushRedis()
         {
             if (_redisSource == null)
@@ -37,7 +49,14 @@ namespace Movement.WebApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Movement
+        /// <summary>
+        /// Index page. When <paramref name="id"/> is provided the action queries the
+        /// selected data source for that single entity. When <paramref name="id"/> is
+        /// empty the action returns a listing of all entries from the selected source.
+        /// </summary>
+        /// <param name="id">Optional id to query.</param>
+        /// <param name="source">Source to query: "redis", "sdcs", "db" or "coordinator".</param>
+        /// <returns>Renders the index view with the requested data.</returns>
         public async Task<IActionResult> Index(int? id, string source = "redis")
         {
             var model = new MovementIndexViewModel
@@ -100,13 +119,19 @@ namespace Movement.WebApp.Controllers
             return View(model);
         }
 
-        // GET: /Movement/Create
+        /// <summary>
+        /// Shows the create form for a new DataEntity.
+        /// </summary>
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: /Movement/Create
+        /// <summary>
+        /// Persist a new DataEntity (or update existing). Uses the coordinator to
+        /// write through to DB and caches.
+        /// </summary>
+        /// <param name="model">The entity to create.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DataEntity model)
@@ -118,7 +143,10 @@ namespace Movement.WebApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Movement/Edit/5
+        /// <summary>
+        /// Show the edit form for an existing entity. Reads from the DB source.
+        /// </summary>
+        /// <param name="id">Entity id.</param>
         public async Task<IActionResult> Edit(int id)
         {
             var entity = await _dbSource.GetAsync(id);
@@ -127,7 +155,11 @@ namespace Movement.WebApp.Controllers
             return View(entity);
         }
 
-        // POST: /Movement/Edit/5
+        /// <summary>
+        /// Save edited entity values.
+        /// </summary>
+        /// <param name="id">Entity id (route).</param>
+        /// <param name="model">Posted entity model.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, DataEntity model)
@@ -142,7 +174,11 @@ namespace Movement.WebApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: /Movement/Delete/5
+        /// <summary>
+        /// Soft-delete an entity by setting <see cref="DataEntity.IsDeleted"/> and
+        /// persisting the change through the coordinator.
+        /// </summary>
+        /// <param name="id">Entity id.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -155,7 +191,10 @@ namespace Movement.WebApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: /Movement/UnDelete/5
+        /// <summary>
+        /// Undo a soft-delete on an entity.
+        /// </summary>
+        /// <param name="id">Entity id.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnDelete(int id)

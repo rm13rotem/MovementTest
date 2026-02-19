@@ -39,6 +39,11 @@ namespace Movement.WebApp.Models.SelfDeterminedCacheSystem
         }
 
 
+        /// <summary>
+        /// Add or update an item in the self-designed cache. Uses a simple Least-Recently-Used
+        /// eviction when capacity is exceeded. This cache is intended for local application
+        /// acceleration and is not persisted.
+        /// </summary>
         public async Task<bool> SetAsync(DataEntity dataEntity)
         {
             try
@@ -63,6 +68,9 @@ namespace Movement.WebApp.Models.SelfDeterminedCacheSystem
 
         }
 
+        /// <summary>
+        /// Retrieve an item from the cache. Updates the last-accessed timestamp for LRU behavior.
+        /// </summary>
         public async Task<DataEntity?> GetAsync(int id)
         {
             try

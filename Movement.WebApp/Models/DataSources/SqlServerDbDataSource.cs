@@ -12,9 +12,15 @@ namespace Movement.WebApp.Models.DataSources
             _context = context;
         }
 
+        /// <summary>
+        /// Return all persisted DataEntity rows from the database. Intended for
+        /// administrative listing and health checks; avoid using this in high-traffic
+        /// code paths without proper paging.
+        /// </summary>
         public async Task<IEnumerable<DataEntity>> GetAllAsync()
         {
-            return await _context.DataEntries.ToListAsync();
+            var list = await _context.DataEntries.AsNoTracking().ToListAsync();
+            return list.Select(e => new DataEntity { Id = e.Id, GuidId = e.GuidId, Value = e.Value, IsDeleted = e.IsDeleted });
         }
 
         public async Task<DataEntity?> GetAsync(int id)

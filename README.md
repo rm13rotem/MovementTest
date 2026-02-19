@@ -60,3 +60,10 @@ Troubleshooting
 - If EF provider is missing, install the `Microsoft.EntityFrameworkCore.SqlServer` package.
 
 If you want I can add a small admin page for Redis key management or create the EF migration files here for you.
+
+## Swagger / OpenAPI
+Open the Swagger UI at:
+
+```
+https://localhost:{port}/swagger
+```

@@ -9,12 +9,23 @@ namespace Movement.WebApp.Models.DataSources
     
         private const string KeyPrefix = "DataEntity:";
 
+        /// <summary>
+        /// Create a new Redis-backed data source.
+        /// </summary>
+        /// <param name="multiplexer">StackExchange.Redis connection multiplexer (injected).</param>
+        /// <param name="config">Application configuration (used to read Redis:InstanceName).</param>
         public RedisDataSource(StackExchange.Redis.IConnectionMultiplexer multiplexer, IConfiguration config)
         {
             _multiplexer = multiplexer ?? throw new ArgumentNullException(nameof(multiplexer));
             _instanceName = config.GetSection("Redis:InstanceName").Value ?? string.Empty;
         }
 
+        /// <summary>
+        /// Return all entries matching the application's instance key prefix in Redis.
+        /// Note: key scanning may be slow on large datasets and requires access to server
+        /// endpoints (server.Keys). For production systems prefer maintaining an index set
+        /// of keys instead of scanning.
+        /// </summary>
         public async Task<IEnumerable<DataEntity>> GetAllAsync()
         {
             try
@@ -50,6 +61,11 @@ namespace Movement.WebApp.Models.DataSources
             }
         }
 
+        /// <summary>
+        /// Remove all application-scoped keys from Redis. This implementation deletes only
+        /// keys that match the configured instance prefix instead of issuing FLUSHALL so it
+        /// works on managed Redis instances where admin operations may be disabled.
+        /// </summary>
         public async Task<bool> FlushAllAsync()
         {
             // Safer implementation: delete only keys that match our application prefix
@@ -111,6 +127,9 @@ namespace Movement.WebApp.Models.DataSources
             return _instanceName + ":" + KeyPrefix + id;
         }
 
+        /// <summary>
+        /// Read a single entity from Redis by id. Returns null when the key is absent.
+        /// </summary>
         public async Task<DataEntity?> GetAsync(int id)
         {
             try
@@ -134,6 +153,10 @@ namespace Movement.WebApp.Models.DataSources
             }
         }
 
+        /// <summary>
+        /// Store an entity in Redis with a 5-minute TTL. Writes are idempotent and will
+        /// overwrite existing values for the same key.
+        /// </summary>
         public async Task<bool> SetAsync(DataEntity entity)
         {
             try
